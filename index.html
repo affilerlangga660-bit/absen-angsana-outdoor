@@ -1,1 +1,1443 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABSEN ANGSANA OUTDOOR</title>
+    <!-- Library SheetJS & FontAwesome Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
+        
+        body { 
+            background: #0f172a; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            padding: 10px;
+        }
 
+        /* Mobile Frame */
+        .phone-frame {
+            width: 100%;
+            max-width: 410px;
+            height: 840px;
+            background-color: #1e293b;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: cover;
+            border-radius: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 12px #1e293b;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Screen Container */
+        .screen {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 75px;
+            position: relative;
+        }
+        .screen::-webkit-scrollbar { display: none; }
+
+        /* Glass Cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 16px;
+            margin: 12px 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Photo Filters */
+        .filter-normal { filter: none; }
+        .filter-grayscale { filter: grayscale(100%); }
+        .filter-sepia { filter: sepia(100%); }
+        .filter-warm { filter: sepia(30%) saturate(140%); }
+        .filter-cool { filter: hue-rotate(180deg) saturate(120%); }
+        .filter-contrast { filter: contrast(160%) brightness(95%); }
+
+        /* Header Bar */
+        .header-bg {
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: white;
+            padding: 20px 16px 35px 16px;
+            border-bottom-left-radius: 28px;
+            border-bottom-right-radius: 28px;
+        }
+
+        .top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .company-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .user-avatar {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+        }
+
+        /* Notification Bell Badge */
+        .notif-bell-btn {
+            position: relative;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .notif-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: #ef4444;
+            color: white;
+            font-size: 9px;
+            font-weight: 800;
+            border-radius: 10px;
+            padding: 1px 5px;
+        }
+
+        /* Stats Overlay Card */
+        .stats-card {
+            margin-top: -25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center;
+        }
+
+        .stat-item h3 { font-size: 18px; color: #0f172a; font-weight: 800; }
+        .stat-item p { font-size: 11px; color: #64748b; font-weight: 600; text-transform: uppercase; }
+
+        /* Schedule / Shift Card */
+        .schedule-card {
+            background: #1e293b;
+            color: white;
+            border-radius: 18px;
+            padding: 14px 16px;
+            margin: 12px 16px 0 16px;
+            border: 1px solid #334155;
+        }
+
+        /* Action Grid */
+        .action-card {
+            background: #2563eb;
+            color: white;
+            border-radius: 18px;
+            padding: 14px;
+            margin: 10px 16px;
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-checkin, .btn-checkout, .btn-leave {
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn-checkin { background: #10b981; }
+        .btn-checkout { background: #f97316; }
+        .btn-leave { grid-column: span 2; background: #eab308; border-radius: 10px; padding: 10px; }
+
+        /* Office Events Section Styling (Positioned at Bottom) */
+        .event-item {
+            background: #f8fafc;
+            border-left: 4px solid #2563eb;
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .event-title { font-size: 12px; font-weight: 700; color: #0f172a; }
+        .event-sub { font-size: 10px; color: #64748b; margin-top: 2px; }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 65px;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #94a3b8;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 25%;
+        }
+
+        .nav-item.active { color: #2563eb; }
+        .nav-item i { font-size: 18px; margin-bottom: 3px; }
+
+        .fab {
+            width: 50px;
+            height: 50px;
+            background: #10b981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+            margin-top: -25px;
+            border: 3px solid white;
+            cursor: pointer;
+        }
+
+        /* Logs & Badges */
+        .log-item {
+            background: white;
+            border-radius: 14px;
+            padding: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .badge {
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+        .badge-pending { background: #fef3c7; color: #d97706; }
+        .badge-approved { background: #d1fae5; color: #059669; }
+        .badge-rejected { background: #fee2e2; color: #dc2626; }
+
+        .gps-link { color: #2563eb; font-weight: 700; text-decoration: none; font-size: 10px; }
+
+        /* Excel View Table Styling */
+        .excel-table-container {
+            overflow-x: auto;
+            background: white;
+            border-radius: 12px;
+            padding: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin-top: 10px;
+        }
+
+        .excel-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            text-align: center;
+            color: #0f172a;
+        }
+
+        .excel-table th, .excel-table td {
+            border: 1px solid #000000;
+            padding: 6px 4px;
+        }
+
+        /* Auth Gate */
+        .auth-gate {
+            position: absolute;
+            inset: 0;
+            background: #0f172a;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 24px;
+            color: white;
+            overflow-y: auto;
+        }
+
+        .auth-card {
+            background: #1e293b;
+            padding: 24px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .login-logo {
+            width: 70px;
+            height: 70px;
+            border-radius: 16px;
+            object-fit: cover;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            border: 2px solid #3b82f6;
+        }
+
+        .input-group { margin-bottom: 12px; }
+        .input-group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 4px; }
+        .input-group input, .input-group select {
+            width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #334155;
+            background: #0f172a; color: white; font-size: 14px;
+        }
+
+        .btn-primary {
+            width: 100%; padding: 12px; background: #2563eb; color: white;
+            border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 8px;
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: absolute; inset: 0; background: rgba(0,0,0,0.7);
+            z-index: 90; display: flex; align-items: center; justify-content: center; padding: 16px;
+        }
+
+        .modal-card {
+            background: #1e293b; color: white; width: 100%; max-height: 90%;
+            overflow-y: auto; border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div class="phone-frame" id="phoneFrame">
+
+    <!-- AUTH GATE -->
+    <div class="auth-gate" id="authGate">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <img src="d7e235edf767131ca30256cde0d8e651.jpeg" alt="Logo" class="login-logo">
+            <h2 style="margin-top: 10px;">ANGSANA OUTDOOR</h2>
+            <p style="font-size: 12px; color: #94a3b8;">Sistem Presensi, Jadwal & Acara Kantor</p>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <div class="auth-card" id="loginForm">
+            <h3 style="margin-bottom: 16px;">Masuk Akun</h3>
+
+            <div class="input-group">
+                <label>Nama Pengguna</label>
+                <input type="text" id="loginUsername" placeholder="Masukkan nama pengguna">
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="loginPassword" placeholder="Masukkan password">
+            </div>
+            <button class="btn-primary" onclick="handleLogin()">MASUK</button>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 12px;">
+                <a href="#" style="color: #f59e0b;" onclick="toggleAuth('forgot')">Lupa Password?</a>
+                <a href="#" style="color: #3b82f6;" onclick="toggleAuth('register')">Daftar Akun Baru</a>
+            </div>
+        </div>
+
+        <!-- FORGOT PASSWORD FORM -->
+        <div class="auth-card hidden" id="forgotForm">
+            <h3 style="margin-bottom: 6px;">Pemulihan Password</h3>
+            <div class="input-group">
+                <label>Nama Pengguna Terdaftar</label>
+                <input type="text" id="forgotIdentity" placeholder="Masukkan nama pengguna">
+            </div>
+            <div class="input-group">
+                <label>Password Baru</label>
+                <input type="password" id="forgotNewPass" placeholder="Masukkan password baru">
+            </div>
+            <button class="btn-primary" style="background: #f59e0b;" onclick="handleForgotPassword()">RESET PASSWORD</button>
+            <p style="text-align: center; font-size: 12px; color: #94a3b8; margin-top: 12px;">
+                Ingat password? <a href="#" style="color: #3b82f6;" onclick="toggleAuth('login')">Kembali Masuk</a>
+            </p>
+        </div>
+
+        <!-- REGISTER FORM -->
+        <div class="auth-card hidden" id="registerForm">
+            <h3 style="margin-bottom: 6px;">Daftar Akun Karyawan</h3>
+            
+            <div class="input-group">
+                <label>Nama Lengkap</label>
+                <input type="text" id="regName" placeholder="Contoh: AFFIL ERLANGGA">
+            </div>
+            <div class="input-group">
+                <label>Nama Pengguna</label>
+                <input type="text" id="regUsername" placeholder="Contoh: AFFIL_ER">
+            </div>
+            <div class="input-group">
+                <label>Jabatan / Divisi</label>
+                <input type="text" id="regJob" placeholder="Contoh: Staff">
+            </div>
+            <div class="input-group">
+                <label>Kata Sandi (Password)</label>
+                <input type="password" id="regPassword" placeholder="Buat kata sandi baru">
+            </div>
+            <div class="input-group">
+                <label>Konfirmasi Kata Sandi</label>
+                <input type="password" id="regPasswordConfirm" placeholder="Ketik ulang kata sandi">
+            </div>
+            <button class="btn-primary" style="background: #10b981;" onclick="handleRegister()">DAFTAR AKUN</button>
+            <p style="text-align: center; font-size: 12px; color: #94a3b8; margin-top: 12px;">
+                Sudah ada akun? <a href="#" style="color: #3b82f6;" onclick="toggleAuth('login')">Masuk</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- MAIN APP SCREEN -->
+    <div class="screen" id="appScreen">
+        
+        <!-- Header -->
+        <div class="header-bg">
+            <div class="top-row">
+                <div class="company-badge">
+                    <!-- <i class="fa-solid fa-building" style="color: #f97316;"></i> P -->
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <button class="notif-bell-btn hidden" id="btnNotifBell" onclick="openNotifModal()">
+                        <i class="fa-solid fa-bell"></i>
+                        <span class="notif-badge" id="notifCountBadge">0</span>
+                    </button>
+                    <span id="roleBadge" style="background: rgba(255,255,255,0.2); padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight:700;">
+                        Karyawan
+                    </span>
+                    <i class="fa-solid fa-right-from-bracket" style="margin-left: 4px; cursor: pointer;" onclick="handleLogout()"></i>
+                </div>
+            </div>
+
+            <div class="user-info">
+                <img id="displayAvatar" src="" class="user-avatar filter-normal" alt="Avatar">
+                <div>
+                    <h4 id="displayName">Memuat...</h4>
+                    <p id="displaySub" style="font-size: 11px; opacity: 0.8;">Memuat...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- HOME TAB -->
+        <div id="viewHome">
+            <div class="glass-card stats-card">
+                <div class="stat-item">
+                    <h3 id="statKehadiran">0<span style="font-size: 10px;">Hari</span></h3>
+                    <p>Kehadiran</p>
+                </div>
+                <div style="width: 1px; height: 30px; background: #cbd5e1;"></div>
+                <div class="stat-item">
+                    <h3 id="statCuti">0<span style="font-size: 10px;">Kali</span></h3>
+                    <p>Cuti/Izin</p>
+                </div>
+                <div style="width: 1px; height: 30px; background: #cbd5e1;"></div>
+                <div class="stat-item">
+                    <h3 id="statTerlambat">0<span style="font-size: 10px;">m</span></h3>
+                    <p>Terlambat</p>
+                </div>
+            </div>
+
+            <!-- JADWAL SHIFT KERJA SECTION -->
+            <div class="schedule-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 12px; font-weight: 700; color: #38bdf8;">
+                        <i class="fa-solid fa-user-clock"></i> JADWAL SHIFT KERJA
+                    </span>
+                    <button onclick="showEditShiftModal()" style="background: #0284c7; color: white; border: none; padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; cursor: pointer;">
+                        ⚙ Atur Shift
+                    </button>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 10px; border-radius: 10px;">
+                    <div>
+                        <p style="font-size: 11px; color: #94a3b8;">Pilihan Shift Hari Ini:</p>
+                        <select id="shiftSelect" onchange="updateShiftTime()" style="background: #1e293b; color: white; border: 1px solid #334155; border-radius: 6px; padding: 4px 8px; font-size: 12px; font-weight: 700; margin-top: 2px;">
+                            <option value="pagi">Shift Pagi (08:00 - 17:00)</option>
+                            <option value="siang">Shift Siang (13:00 - 22:00)</option>
+                            <!-- <option value="malam">Shift Malam (21:00 - 06:00)</option> -->
+                            <option value="custom">Custom Shift Saya</option>
+                        </select>
+                    </div>
+                    <div style="text-align: right;">
+                        <p style="font-size: 10px; color: #94a3b8;">Target Shift</p>
+                        <p style="font-size: 12px; font-weight: 800; color: #10b981;" id="scheduleTargetText">08:00 - 17:00 WIB</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <div class="action-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <p id="currentDateStr" style="font-size: 12px; font-weight: 700; opacity: 0.9;">Hari Ini</p>
+                    <span style="font-size: 10px; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 8px;">Presensi Realtime</span>
+                </div>
+
+                <div class="action-grid">
+                    <button class="btn-checkin" onclick="doAbsen('Masuk')">
+                        <i class="fa-solid fa-right-to-bracket"></i> <span id="shiftInText">08:00 WIB</span><br><small>Check In</small>
+                    </button>
+                    <button class="btn-checkout" onclick="doAbsen('Keluar')">
+                        <i class="fa-solid fa-right-from-bracket"></i> <span id="shiftOutText">17:00 WIB</span><br><small>Check Out</small>
+                    </button>
+                    <button class="btn-leave" onclick="showLeaveModal()">
+                        <i class="fa-solid fa-notes-medical"></i> Ajukan LIBUR / Izin Sakit
+                    </button>
+                </div>
+            </div>
+
+            <!-- RIWAYAT PRESENSI -->
+            <div style="padding: 0 16px; margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h4 style="color: white; font-size: 14px;" id="logsHeaderTitle">Riwayat Presensi</h4>
+                    <div style="display: flex; gap: 6px;">
+                        <button id="btnResetLogs" class="hidden" onclick="resetAllAttendanceLogs()" style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 8px; font-size: 10px; cursor: pointer; font-weight:700;">
+                            🔄 Reset
+                        </button>
+                        <button onclick="exportToExcelFormatted()" style="background: #1e3a8a; color: white; border: none; padding: 5px 10px; border-radius: 8px; font-size: 10px; cursor: pointer; font-weight:700;">
+                            📊 Download Excel
+                        </button>
+                    </div>
+                </div>
+
+                <div id="attendanceLogsList">
+                    <!-- Dynamic logs -->
+                </div>
+            </div>
+
+            <!-- FITUR JADWAL & ACARA KANTOR (TERLETAK DI POSISI BAWAH TAMPILAN) -->
+            <div class="glass-card" style="margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <h4 style="font-size: 14px; color: #0f172a; display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-calendar-days" style="color: #2563eb;"></i> Jadwal & Acara Kantor
+                    </h4>
+                    <button id="btnAddEventBtn" class="hidden" onclick="showAddEventModal()" style="background: #2563eb; color: white; border: none; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; cursor: pointer;">
+                        + Tambah Acara
+                    </button>
+                </div>
+
+                <div id="officeEventsContainer">
+                    <!-- Dynamic Events List -->
+                </div>
+            </div>
+
+        </div>
+
+        <!-- VIEW EXCEL TAB -->
+        <div id="viewExcel" class="hidden" style="padding: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h3 style="color: white; font-size: 16px;"><i class="fa-solid fa-file-excel" style="color: #10b981;"></i> View Excel Laporan</h3>
+                <button onclick="exportToExcelFormatted()" style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">
+                    📥 Download File
+                </button>
+            </div>
+            
+            <p style="color: #cbd5e1; font-size: 11px; margin-bottom: 10px;">Pratinjau rekap presensi bulanan:</p>
+            
+            <div id="excelViewContainer" class="excel-table-container">
+                <!-- Excel Table -->
+            </div>
+        </div>
+
+        <!-- PROFILE TAB -->
+        <div id="viewProfile" class="hidden" style="padding: 16px;">
+            <div class="glass-card" style="text-align: center;">
+                <img id="profAvatar" src="" class="filter-normal" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 8px;">
+                <h3 id="profName">Memuat...</h3>
+                <p id="profJob" style="font-size: 12px; color: #64748b; font-weight: 600; display: none;"></p>
+                <div style="margin-top: 15px; text-align: left; font-size: 13px; line-height: 1.8; border-top: 1px solid #e2e8f0; padding-top: 10px;">
+                    <p><b>Nama Pengguna:</b> <span id="profUsername"></span></p>
+                    <p><b>Filter Foto:</b> <span id="profFilterText"></span></p>
+                    <p><b>Jadwal Shift Preset:</b> <span id="profShiftText"></span></p>
+                    <p><b>Hak Akses:</b> <span id="profRoleText"></span></p>
+                </div>
+
+                <button onclick="showEditPhotoModal()" class="btn-primary" style="margin-top: 12px; background: #8b5cf6;">
+                    📸 Ganti Foto Profil & Filter Warna
+                </button>
+                <button onclick="showEditProfileModal()" class="btn-primary" style="margin-top: 8px; background: #3b82f6;">
+                    ✏ Ubah Profil, Nama Pengguna & Password
+                </button>
+                <button onclick="showEditShiftModal()" class="btn-primary" style="margin-top: 8px; background: #059669;">
+                    ⚙ Atur Jam Jadwal / Shift Kerja
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bottom-nav">
+        <button class="nav-item active" onclick="switchTab('home', this)">
+            <i class="fa-solid fa-house"></i> Home
+        </button>
+        <button class="nav-item" onclick="switchTab('excel', this)">
+            <i class="fa-solid fa-table"></i> Rekap Excel
+        </button>
+        <div class="fab" onclick="doAbsen('Masuk')">
+            <i class="fa-solid fa-right-to-bracket"></i>
+        </div>
+        <button class="nav-item" onclick="switchTab('profile', this)">
+            <i class="fa-solid fa-user"></i> Profile
+        </button>
+    </div>
+
+    <!-- NOTIFICATION MODAL -->
+    <div id="notifModal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h3>🔔 Notifikasi Pengajuan</h3>
+                <button onclick="closeNotifModal()" style="background: none; border: none; color: white; font-size: 18px; cursor: pointer;">✕</button>
+            </div>
+            <div id="notifListContainer"></div>
+        </div>
+    </div>
+
+    <!-- ADD OFFICE EVENT MODAL -->
+    <div id="addEventModal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h3>📅 Tambah Jadwal & Acara Kantor</h3>
+                <button onclick="closeAddEventModal()" style="background: none; border: none; color: white; font-size: 18px; cursor: pointer;">✕</button>
+            </div>
+
+            <div class="input-group">
+                <label>Nama Acara / Agenda</label>
+                <input type="text" id="evTitle" placeholder="Contoh: Rapat Evaluasi Bulanan">
+            </div>
+            <div class="input-group">
+                <label>Tanggal Acara</label>
+                <input type="date" id="evDate">
+            </div>
+            <div class="input-group">
+                <label>Waktu / Jam</label>
+                <input type="text" id="evTime" placeholder="Contoh: 09:00 - 11:30 WIB">
+            </div>
+            <div class="input-group">
+                <label>Lokasi / Ruangan</label>
+                <input type="text" id="evLocation" placeholder="Contoh: Ruang Rapat Utama">
+            </div>
+
+            <button class="btn-primary" style="background: #10b981;" onclick="saveOfficeEvent()">SIMPAN ACARA KANTOR</button>
+        </div>
+    </div>
+
+    <!-- EDIT PHOTO & FILTER MODAL -->
+    <div id="photoModal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h3>📸 Ganti Foto & Filter Profil</h3>
+                <button onclick="closePhotoModal()" style="background: none; border: none; color: white; font-size: 18px; cursor: pointer;">✕</button>
+            </div>
+
+            <div class="input-group">
+                <!-- <label>Pilih Preset Foto / Avatar</label> -->
+                <select id="presetPhotoSelect" onchange="previewSelectedPhoto()">
+                    <!-- <option value="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80">Avatar 1 (Wanita Professional)</option> -->
+                    <!-- <option value="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80">Avatar 2 (Pria Staff)</option> -->
+                    <!-- <option value="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80">Avatar 3 (Manager/Pihak 2)</option> -->
+                <!-- </select> -->
+            </div>
+
+            <div class="input-group">
+                <label>Atau Upload File Gambar (Lokal)</label>
+                <input type="file" id="localFileInput" accept="image/*" onchange="handleFileUpload(event)">
+            </div>
+
+            <div class="input-group">
+                <label>Pilih Filter Warna Foto</label>
+                <select id="filterClassSelect" onchange="previewSelectedPhoto()">
+                    <option value="filter-normal">Normal (Asli)</option>
+                    <option value="filter-grayscale">Grayscale (Hitam Putih)</option>
+                    <option value="filter-sepia">Sepia (Klasik)</option>
+                    <option value="filter-warm">Warm (Hangat)</option>
+                    <option value="filter-cool">Cool (Dingin / Biru)</option>
+                    <option value="filter-contrast">High Contrast (Kontras Tinggi)</option>
+                </select>
+            </div>
+
+            <div style="text-align: center; margin: 12px 0;">
+                <p style="font-size: 11px; color: #94a3b8; margin-bottom: 6px;">Pratinjau Foto:</p>
+                <img id="previewAvatarImg" src="" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid #3b82f6;">
+            </div>
+
+            <button class="btn-primary" style="background: #10b981;" onclick="saveProfilePhoto()">SIMPAN FOTO & FILTER</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const COMPANY_PHOTO_URL = "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1000&q=80";
+    document.getElementById('phoneFrame').style.backgroundImage = `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('${COMPANY_PHOTO_URL}')`;
+
+    const defaultAccounts = [
+        { 
+            username: "pihak2_akun", 
+            pass: "12345", 
+            name: "Pihak Kedua", 
+            job: "", 
+            role: "pihak2", 
+            avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80", 
+            filterClass: "filter-normal", 
+            customShiftIn: "08:00", 
+            customShiftOut: "17:00" 
+        }
+    ];
+
+    const defaultOfficeEvents = [
+        { id: 1, title: "Rapat Evaluasi Tim Bulanan", date: "10 Oktober 2026", time: "09:00 WIB", location: "Ruang Rapat Utama" },
+        { id: 2, title: "Maintenance Server & Sistem", date: "15 Oktober 2026", time: "22:00 WIB", location: "Remote / Online" },
+        { id: 3, title: "Acara Kebersamaan / Gathering", date: "25 Oktober 2026", time: "10:00 WIB", location: "Hall Utama Kantor" }
+    ];
+
+    let currentUser = null;
+    let registeredUsers = [];
+    let attendanceLogs = [];
+    let officeEvents = [];
+
+    const shiftPresets = {
+        pagi: { in: "08:00", out: "17:00" },
+        siang: { in: "13:00", out: "21:00" },
+        malam: { in: "21:00", out: "06:00" },
+        custom: { in: "09:00", out: "18:00" }
+    };
+
+    function initStorage() {
+        const storedUsers = localStorage.getItem('geprek_users');
+        if (!storedUsers) {
+            registeredUsers = [...defaultAccounts];
+            localStorage.setItem('geprek_users', JSON.stringify(registeredUsers));
+        } else {
+            registeredUsers = JSON.parse(storedUsers);
+            registeredUsers = registeredUsers.filter(u => u.username !== 'manager_geprek');
+
+            defaultAccounts.forEach(defAcc => {
+                let exist = registeredUsers.find(u => u.username === defAcc.username);
+                if (!exist) registeredUsers.push(defAcc);
+            });
+            localStorage.setItem('geprek_users', JSON.stringify(registeredUsers));
+        }
+
+        attendanceLogs = JSON.parse(localStorage.getItem('geprek_logs')) || [];
+
+        const storedEvents = localStorage.getItem('geprek_events');
+        if (!storedEvents) {
+            officeEvents = [...defaultOfficeEvents];
+            localStorage.setItem('geprek_events', JSON.stringify(officeEvents));
+        } else {
+            officeEvents = JSON.parse(storedEvents);
+        }
+
+        const now = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('currentDateStr').innerText = now.toLocaleDateString('id-ID', options);
+    }
+
+    function saveToStorage() {
+        localStorage.setItem('geprek_users', JSON.stringify(registeredUsers));
+        localStorage.setItem('geprek_logs', JSON.stringify(attendanceLogs));
+        localStorage.setItem('geprek_events', JSON.stringify(officeEvents));
+    }
+
+    function toggleAuth(type) {
+        document.getElementById('loginForm').classList.add('hidden');
+        document.getElementById('registerForm').classList.add('hidden');
+        document.getElementById('forgotForm').classList.add('hidden');
+
+        if(type === 'register') document.getElementById('registerForm').classList.remove('hidden');
+        else if(type === 'forgot') document.getElementById('forgotForm').classList.remove('hidden');
+        else document.getElementById('loginForm').classList.remove('hidden');
+    }
+
+    function handleForgotPassword() {
+        const identity = document.getElementById('forgotIdentity').value.trim();
+        const newPass = document.getElementById('forgotNewPass').value.trim();
+
+        if(!identity || !newPass) {
+            alert('Harap isi identitas dan password baru Anda!');
+            return;
+        }
+
+        const userFound = registeredUsers.find(u => u.username === identity);
+        if(!userFound) {
+            alert('Nama Pengguna tidak ditemukan!');
+            return;
+        }
+
+        userFound.pass = newPass;
+        saveToStorage();
+        alert('Password berhasil direset! Silakan masuk kembali.');
+        document.getElementById('forgotIdentity').value = '';
+        document.getElementById('forgotNewPass').value = '';
+        toggleAuth('login');
+    }
+
+    function handleRegister() {
+        const name = document.getElementById('regName').value.trim();
+        const username = document.getElementById('regUsername').value.trim();
+        const job = document.getElementById('regJob').value.trim();
+        const pass = document.getElementById('regPassword').value.trim();
+        const passConfirm = document.getElementById('regPasswordConfirm').value.trim();
+
+        if(!name || !username || !pass || !passConfirm) {
+            alert('Harap isi semua kolom pendaftaran!');
+            return;
+        }
+
+        if(pass !== passConfirm) {
+            alert('Konfirmasi Kata Sandi tidak cocok!');
+            return;
+        }
+
+        const exist = registeredUsers.find(u => u.username === username);
+        if(exist) {
+            alert('Nama pengguna sudah digunakan! Gunakan yang lain.');
+            return;
+        }
+
+        const newUser = {
+            username: username,
+            pass: pass,
+            name: name,
+            job: job || '',
+            role: "pihak1",
+            avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80",
+            filterClass: "filter-normal",
+            customShiftIn: "08:00",
+            customShiftOut: "17:00"
+        };
+
+        registeredUsers.push(newUser);
+        saveToStorage();
+        alert('Pendaftaran Berhasil! Silakan Login.');
+
+        document.getElementById('regName').value = '';
+        document.getElementById('regUsername').value = '';
+        document.getElementById('regJob').value = '';
+        document.getElementById('regPassword').value = '';
+        document.getElementById('regPasswordConfirm').value = '';
+        toggleAuth('login');
+    }
+
+    function handleLogin() {
+        const u = document.getElementById('loginUsername').value.trim();
+        const p = document.getElementById('loginPassword').value.trim();
+
+        const found = registeredUsers.find(user => user.username === u && user.pass === p);
+        if(!found) {
+            alert('Nama Pengguna atau Password salah!');
+            return;
+        }
+
+        currentUser = found;
+        document.getElementById('authGate').classList.add('hidden');
+        setupUserInterface();
+    }
+
+    function handleLogout() {
+        currentUser = null;
+        document.getElementById('authGate').classList.remove('hidden');
+    }
+
+    function applyUserFilter(imgElement, filterClass) {
+        imgElement.className = imgElement.className.replace(/filter-\w+/g, '').trim();
+        imgElement.classList.add(filterClass || 'filter-normal');
+    }
+
+    function setupUserInterface() {
+        document.getElementById('displayName').innerText = currentUser.name;
+        
+        const displaySubEl = document.getElementById('displaySub');
+        if (currentUser.job && currentUser.role !== 'pihak2') {
+            displaySubEl.innerText = `${currentUser.job} • @${currentUser.username}`;
+        } else {
+            displaySubEl.innerText = `@${currentUser.username}`;
+        }
+        
+        const avatarEl = document.getElementById('displayAvatar');
+        avatarEl.src = currentUser.avatar;
+        applyUserFilter(avatarEl, currentUser.filterClass);
+
+        document.getElementById('roleBadge').innerText = currentUser.role === 'pihak2' ? 'Pihak ke-2' : 'Karyawan';
+
+        shiftPresets.custom.in = currentUser.customShiftIn || "08:00";
+        shiftPresets.custom.out = currentUser.customShiftOut || "17:00";
+        updateShiftTime();
+
+        document.getElementById('profName').innerText = currentUser.name;
+        
+        const profJobEl = document.getElementById('profJob');
+        if (currentUser.job && currentUser.role !== 'pihak2') {
+            profJobEl.innerText = currentUser.job;
+            profJobEl.style.display = 'block';
+        } else {
+            profJobEl.style.display = 'none';
+        }
+
+        document.getElementById('profUsername').innerText = currentUser.username;
+        
+        const profAvatarEl = document.getElementById('profAvatar');
+        profAvatarEl.src = currentUser.avatar;
+        applyUserFilter(profAvatarEl, currentUser.filterClass);
+
+        document.getElementById('profFilterText').innerText = (currentUser.filterClass || 'filter-normal').replace('filter-', '').toUpperCase();
+        document.getElementById('profShiftText').innerText = `${currentUser.customShiftIn || '08:00'} - ${currentUser.customShiftOut || '17:00'}`;
+        document.getElementById('profRoleText').innerText = currentUser.role === 'pihak2' ? 'Pihak Ke-2' : 'Karyawan';
+
+        if(currentUser.role === 'pihak2') {
+            document.getElementById('logsHeaderTitle').innerText = 'Riwayat Presensi Semua Karyawan';
+            document.getElementById('btnNotifBell').classList.remove('hidden');
+            document.getElementById('btnResetLogs').classList.remove('hidden');
+            document.getElementById('btnAddEventBtn').classList.remove('hidden');
+        } else {
+            document.getElementById('logsHeaderTitle').innerText = 'Riwayat Presensi Saya';
+            document.getElementById('btnNotifBell').classList.add('hidden');
+            document.getElementById('btnResetLogs').classList.add('hidden');
+            document.getElementById('btnAddEventBtn').classList.add('hidden');
+        }
+
+        renderLogs();
+        calculateStatistics();
+        renderExcelPreview();
+        renderOfficeEvents();
+        updateNotificationCount();
+    }
+
+    function updateShiftTime() {
+        const selected = document.getElementById('shiftSelect').value;
+        let inStr = "08:00", outStr = "17:00";
+        if(selected === 'custom' && currentUser) {
+            inStr = currentUser.customShiftIn || '08:00';
+            outStr = currentUser.customShiftOut || '17:00';
+        } else {
+            inStr = shiftPresets[selected].in;
+            outStr = shiftPresets[selected].out;
+        }
+
+        document.getElementById('shiftInText').innerText = `${inStr} WIB`;
+        document.getElementById('shiftOutText').innerText = `${outStr} WIB`;
+        document.getElementById('scheduleTargetText').innerText = `${inStr} - ${outStr} WIB`;
+    }
+
+    function calculateLateMinutes(checkInTimeStr, shiftInStr) {
+        const [cHour, cMin] = checkInTimeStr.split(':').map(Number);
+        const [sHour, sMin] = shiftInStr.split(':').map(Number);
+        const diff = (cHour * 60 + cMin) - (sHour * 60 + sMin);
+        return diff > 0 ? diff : 0;
+    }
+
+    function doAbsen(type) {
+        if(!currentUser) return;
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => saveAbsenData(type, pos.coords.latitude.toFixed(5), pos.coords.longitude.toFixed(5)),
+                (err) => { alert("GPS tidak aktif. Absen dicatat tanpa lokasi."); saveAbsenData(type, "-", "-"); }
+            );
+        } else {
+            saveAbsenData(type, "-", "-");
+        }
+    }
+
+    function saveAbsenData(type, lat, long, reason = "") {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
+        const dateStr = now.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' });
+
+        const selectedShiftKey = document.getElementById('shiftSelect').value;
+        const targetShiftIn = selectedShiftKey === 'custom' ? currentUser.customShiftIn : shiftPresets[selectedShiftKey].in;
+
+        let lateMinutes = 0;
+        if(type === 'Masuk') lateMinutes = calculateLateMinutes(timeStr, targetShiftIn);
+
+        const log = {
+            id: Date.now(), name: currentUser.name, username: currentUser.username,
+            type: type, time: timeStr.replace('.', ':'), date: dateStr, fullDate: now.toISOString().slice(0,10),
+            lat: lat, long: long, reason: reason, lateMinutes: lateMinutes, status: 'Menunggu Persetujuan'
+        };
+
+        attendanceLogs.unshift(log);
+        saveToStorage();
+        renderLogs();
+        calculateStatistics();
+        renderExcelPreview();
+        updateNotificationCount();
+
+        let lateNotice = lateMinutes > 0 ? `\n⚠ Anda Terlambat ${lateMinutes} Menit dari jadwal shift.` : '';
+        alert(`Pengajuan ${type} berhasil dikirim pada ${timeStr}.${lateNotice}\nMenunggu persetujuan.`);
+    }
+
+    function showLeaveModal() {
+        const reason = prompt("Masukkan Alasan Cuti / Izin Sakit:");
+        if(reason) saveAbsenData("Cuti / Sakit", "-", "-", reason);
+    }
+
+    /* RENDER ACARA & JADWAL KANTOR */
+    function renderOfficeEvents() {
+        const container = document.getElementById('officeEventsContainer');
+        container.innerHTML = '';
+
+        if(officeEvents.length === 0) {
+            container.innerHTML = '<p style="font-size: 11px; color: #64748b; text-align: center;">Belum ada jadwal atau acara kantor mendatang.</p>';
+            return;
+        }
+
+        officeEvents.forEach(ev => {
+            const item = document.createElement('div');
+            item.className = 'event-item';
+            item.innerHTML = `
+                <div>
+                    <div class="event-title">${ev.title}</div>
+                    <div class="event-sub">📅 ${ev.date} • ⏰ ${ev.time}</div>
+                    <div class="event-sub">📍 ${ev.location}</div>
+                </div>
+                ${currentUser && currentUser.role === 'pihak2' ? `
+                    <button onclick="deleteOfficeEvent(${ev.id})" style="background: #ef4444; color: white; border: none; padding: 4px 8px; border-radius: 6px; font-size: 10px; cursor: pointer; font-weight: 700;">Hapus</button>
+                ` : ''}
+            `;
+            container.appendChild(item);
+        });
+    }
+
+    function showAddEventModal() { document.getElementById('addEventModal').classList.remove('hidden'); }
+    function closeAddEventModal() { document.getElementById('addEventModal').classList.add('hidden'); }
+
+    function saveOfficeEvent() {
+        const title = document.getElementById('evTitle').value.trim();
+        const rawDate = document.getElementById('evDate').value;
+        const time = document.getElementById('evTime').value.trim();
+        const location = document.getElementById('evLocation').value.trim();
+
+        if(!title || !rawDate || !time || !location) {
+            alert("Harap isi semua informasi acara kantor!");
+            return;
+        }
+
+        const dateObj = new Date(rawDate);
+        const options = { day: 'numeric', month: 'long', year: 'numeric' };
+        const formattedDate = dateObj.toLocaleDateString('id-ID', options);
+
+        const newEv = {
+            id: Date.now(),
+            title: title,
+            date: formattedDate,
+            time: time,
+            location: location
+        };
+
+        officeEvents.push(newEv);
+        saveToStorage();
+        renderOfficeEvents();
+        closeAddEventModal();
+
+        document.getElementById('evTitle').value = '';
+        document.getElementById('evDate').value = '';
+        document.getElementById('evTime').value = '';
+        document.getElementById('evLocation').value = '';
+        alert("Jadwal / Acara kantor berhasil ditambahkan!");
+    }
+
+    function deleteOfficeEvent(id) {
+        if(currentUser.role !== 'pihak2') return;
+        if(confirm("Hapus jadwal acara ini dari daftar kantor?")) {
+            officeEvents = officeEvents.filter(e => e.id !== id);
+            saveToStorage();
+            renderOfficeEvents();
+        }
+    }
+
+    function approveReject(id, newStatus) {
+        if(currentUser.role !== 'pihak2') return;
+        const target = attendanceLogs.find(l => l.id === id);
+        if(target) {
+            target.status = newStatus;
+            saveToStorage();
+            renderLogs();
+            calculateStatistics();
+            renderExcelPreview();
+            updateNotificationCount();
+            if(!document.getElementById('notifModal').classList.contains('hidden')) renderNotificationList();
+        }
+    }
+
+    function resetAllAttendanceLogs() {
+        if(currentUser.role !== 'pihak2') return;
+        if(confirm("Hapus seluruh riwayat presensi semua karyawan? Data tidak dapat dikembalikan.")) {
+            attendanceLogs = [];
+            saveToStorage();
+            renderLogs();
+            calculateStatistics();
+            renderExcelPreview();
+            updateNotificationCount();
+            alert("Riwayat presensi berhasil direset.");
+        }
+    }
+
+    function calculateStatistics() {
+        let countKehadiran = 0, countCuti = 0, totalTerlambatMinutes = 0;
+        const filteredLogs = currentUser.role === 'pihak2'
+            ? attendanceLogs.filter(l => l.status === 'Disetujui')
+            : attendanceLogs.filter(l => l.username === currentUser.username && l.status === 'Disetujui');
+
+        filteredLogs.forEach(log => {
+            if (log.type === 'Masuk' || log.type === 'Keluar') countKehadiran++;
+            else if (log.type === 'Cuti / Sakit') countCuti++;
+            if (log.lateMinutes && log.lateMinutes > 0) totalTerlambatMinutes += log.lateMinutes;
+        });
+
+        document.getElementById('statKehadiran').innerHTML = `${countKehadiran}<span style="font-size: 10px;">Hari</span>`;
+        document.getElementById('statCuti').innerHTML = `${countCuti}<span style="font-size: 10px;">Kali</span>`;
+        document.getElementById('statTerlambat').innerHTML = `${totalTerlambatMinutes}<span style="font-size: 10px;">m</span>`;
+    }
+
+    function renderLogs() {
+        const container = document.getElementById('attendanceLogsList');
+        container.innerHTML = '';
+        const displayLogs = (currentUser.role === 'pihak2') ? attendanceLogs : attendanceLogs.filter(l => l.username === currentUser.username);
+
+        if(displayLogs.length === 0) {
+            container.innerHTML = '<p style="color: white; font-size: 12px; text-align: center; opacity: 0.8;">Belum ada catatan absen.</p>';
+            return;
+        }
+
+        displayLogs.forEach(log => {
+            let badgeClass = log.status === 'Disetujui' ? 'badge-approved' : (log.status === 'Ditolak' ? 'badge-rejected' : 'badge-pending');
+            const gpsLink = (log.lat !== '-' && log.long !== '-') 
+                ? `<a href="https://maps.google.com/?q=${log.lat},${log.long}" target="_blank" class="gps-link">📍 Google Maps</a>`
+                : `<span style="font-size:10px; color:#94a3b8;">📍 Tanpa GPS</span>`;
+            const lateTag = log.lateMinutes > 0 ? `<span style="color: #ef4444; font-weight:700; font-size:10px; margin-left:5px;">(Telat ${log.lateMinutes}m)</span>` : '';
+            const reasonTag = log.reason ? `<p style="font-size:11px; color:#475569; margin-top:2px;"><b>Alasan:</b> ${log.reason}</p>` : '';
+
+            const item = document.createElement('div');
+            item.className = 'log-item';
+            item.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong style="font-size: 13px; color: #1e293b;">${log.name} ${currentUser.role === 'pihak2' ? `<span style="font-size:10px; color:#64748b;">(@${log.username})</span>` : ''}</strong>
+                        <p style="font-size: 10px; color: #64748b;">${log.date} • ${log.time} (${log.type})${lateTag}</p>
+                        ${reasonTag}
+                    </div>
+                    <div><span class="badge ${badgeClass}">${log.status}</span></div>
+                </div>
+                <div style="margin-top: 6px; border-top: 1px dashed #e2e8f0; padding-top: 6px; display: flex; justify-content: space-between; align-items: center;">
+                    ${gpsLink}
+                </div>
+                ${currentUser.role === 'pihak2' && log.status === 'Menunggu Persetujuan' ? `
+                    <div style="margin-top: 8px; display: flex; gap: 6px;">
+                        <button onclick="approveReject(${log.id}, 'Disetujui')" style="background: #10b981; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight:700; cursor: pointer;">Setujui</button>
+                        <button onclick="approveReject(${log.id}, 'Ditolak')" style="background: #ef4444; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight:700; cursor: pointer;">Tolak</button>
+                    </div>
+                ` : ''}
+            `;
+            container.appendChild(item);
+        });
+    }
+
+    function renderExcelPreview() {
+        if(!currentUser) return;
+        const container = document.getElementById('excelViewContainer');
+        const targetUsername = currentUser.username;
+        const targetName = currentUser.name.toUpperCase();
+        
+        const months = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
+        const now = new Date();
+        const currentMonthName = months[now.getMonth()];
+        const currentYear = now.getFullYear();
+        const yearShort = String(currentYear).slice(-2);
+        const totalDaysInMonth = new Date(currentYear, now.getMonth() + 1, 0).getDate();
+
+        const userApprovedLogs = attendanceLogs.filter(l => 
+            (currentUser.role === 'pihak2' || l.username === targetUsername) && l.status === 'Disetujui'
+        );
+
+        let totalMasuk = 0, totalLibur = 0, totalSakit = 0, tableRowsHTML = '';
+
+        for (let day = 1; day <= totalDaysInMonth; day++) {
+            const dayFormatted = String(day).padStart(2, '0');
+            const monthFormatted = String(now.getMonth() + 1).padStart(2, '0');
+            const dateDisplay = `${dayFormatted}/${monthFormatted}/${yearShort}`;
+            const targetFullDate = `${currentYear}-${monthFormatted}-${dayFormatted}`;
+
+            const logsOnDay = userApprovedLogs.filter(l => l.fullDate === targetFullDate || l.date.startsWith(`${dayFormatted}/`));
+            const inLog = logsOnDay.find(l => l.type === 'Masuk');
+            const outLog = logsOnDay.find(l => l.type === 'Keluar');
+            const leaveLog = logsOnDay.find(l => l.type === 'Cuti / Sakit');
+
+            let inTime = '-', outTime = '-', status = 'LIBUR', rowStyle = 'background-color: #ef4444; color: #FFFFFF; font-weight: bold;';
+
+            if (leaveLog) {
+                status = 'SAKIT'; totalSakit++; rowStyle = 'background-color: #3b82f6; color: #FFFFFF; font-weight: bold;';
+            } else if (inLog || outLog) {
+                status = 'MASUK'; totalMasuk++; inTime = inLog ? inLog.time : '-'; outTime = outLog ? outLog.time : '-'; rowStyle = 'background-color: #ffffff; color: #000000;';
+            } else {
+                totalLibur++;
+            }
+
+            tableRowsHTML += `
+                <tr style="${rowStyle}">
+                    <td>${dateDisplay}</td>
+                    <td>${inTime}</td>
+                    <td>${outTime}</td>
+                    <td>${status}</td>
+                </tr>
+            `;
+        }
+
+        container.innerHTML = `
+            <table class="excel-table">
+                <tr style="background-color: #facc15; font-weight: bold;"><td colspan="4" style="font-size: 13px; padding: 6px;">${targetName}</td></tr>
+                <tr style="background-color: #facc15; font-weight: bold;"><td colspan="4" style="padding: 4px;">${currentMonthName} ${currentYear}</td></tr>
+                <tr style="background-color: #93c5fd; font-weight: bold;">
+                    <td>TANGGAL</td>
+                    <td>IN</td>
+                    <td>OUT</td>
+                    <td>KET</td>
+                </tr>
+                ${tableRowsHTML}
+                <tr style="background-color: #f97316; color: white; font-weight: bold;">
+                    <td>JUMLAH HARI</td>
+                    <td>MASUK</td>
+                    <td>LIBUR</td>
+                    <td>SAKIT</td>
+                </tr>
+                <tr style="background-color: #fde047; font-weight: bold;">
+                    <td>${totalDaysInMonth}</td>
+                    <td>${totalMasuk}</td>
+                    <td>${totalLibur}</td>
+                    <td>${totalSakit}</td>
+                </tr>
+            </table>
+        `;
+    }
+
+    function updateNotificationCount() {
+        if(currentUser && currentUser.role === 'pihak2') {
+            const pendingCount = attendanceLogs.filter(l => l.status === 'Menunggu Persetujuan').length;
+            document.getElementById('notifCountBadge').innerText = pendingCount;
+        }
+    }
+
+    function openNotifModal() { document.getElementById('notifModal').classList.remove('hidden'); renderNotificationList(); }
+    function closeNotifModal() { document.getElementById('notifModal').classList.add('hidden'); }
+
+    function renderNotificationList() {
+        const container = document.getElementById('notifListContainer');
+        container.innerHTML = '';
+        const pendingLogs = attendanceLogs.filter(l => l.status === 'Menunggu Persetujuan');
+        if(pendingLogs.length === 0) {
+            container.innerHTML = '<p style="color: #94a3b8; font-size: 12px; text-align: center; padding: 12px;">Tidak ada pengajuan baru.</p>';
+            return;
+        }
+        pendingLogs.forEach(log => {
+            const item = document.createElement('div');
+            item.style.background = '#0f172a'; item.style.padding = '10px'; item.style.borderRadius = '10px'; item.style.marginBottom = '8px';
+            item.innerHTML = `
+                <strong style="color: #3b82f6; font-size: 12px;">${log.name} (@${log.username})</strong>
+                <p style="font-size: 11px; color: #cbd5e1; margin-top:2px;">Mengajukan <b>${log.type}</b> pada ${log.date} ${log.time}</p>
+                ${log.reason ? `<p style="font-size: 10px; color: #94a3b8;">Alasan: ${log.reason}</p>` : ''}
+                <div style="margin-top: 8px; display: flex; gap: 6px;">
+                    <button onclick="approveReject(${log.id}, 'Disetujui')" style="background: #10b981; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-size: 10px; font-weight:700; cursor: pointer;">Setujui</button>
+                    <button onclick="approveReject(${log.id}, 'Ditolak')" style="background: #ef4444; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-size: 10px; font-weight:700; cursor: pointer;">Tolak</button>
+                </div>
+            `;
+            container.appendChild(item);
+        });
+    }
+
+    let tempAvatarData = "";
+    function showEditPhotoModal() {
+        tempAvatarData = currentUser.avatar;
+        document.getElementById('presetPhotoSelect').value = currentUser.avatar;
+        document.getElementById('filterClassSelect').value = currentUser.filterClass || 'filter-normal';
+        previewSelectedPhoto();
+        document.getElementById('photoModal').classList.remove('hidden');
+    }
+    function closePhotoModal() { document.getElementById('photoModal').classList.add('hidden'); }
+    function handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) { tempAvatarData = e.target.result; previewSelectedPhoto(); };
+            reader.readAsDataURL(file);
+        }
+    }
+    function previewSelectedPhoto() {
+        const presetUrl = document.getElementById('presetPhotoSelect').value;
+        const filterClass = document.getElementById('filterClassSelect').value;
+        const imgEl = document.getElementById('previewAvatarImg');
+        imgEl.src = tempAvatarData || presetUrl;
+        applyUserFilter(imgEl, filterClass);
+    }
+    function saveProfilePhoto() {
+        currentUser.avatar = tempAvatarData || document.getElementById('presetPhotoSelect').value;
+        currentUser.filterClass = document.getElementById('filterClassSelect').value;
+        saveToStorage(); setupUserInterface(); closePhotoModal();
+        alert('Foto profil dan filter warna diperbarui!');
+    }
+
+    function showEditProfileModal() {
+        const newName = prompt("Ubah Nama Lengkap:", currentUser.name);
+        const newUsername = prompt("Ubah Nama Pengguna:", currentUser.username);
+        const newPass = prompt("Ubah Password Baru:", currentUser.pass);
+
+        if(newName && newUsername && newPass) {
+            currentUser.name = newName;
+            currentUser.username = newUsername;
+            currentUser.pass = newPass;
+            saveToStorage(); setupUserInterface();
+            alert("Profil berhasil diperbarui!");
+        }
+    }
+
+    function showEditShiftModal() {
+        const newIn = prompt("Atur Jam Masuk Shift Custom (HH:MM):", currentUser.customShiftIn || "08:00");
+        const newOut = prompt("Atur Jam Pulang Shift Custom (HH:MM):", currentUser.customShiftOut || "17:00");
+        if(newIn && newOut) {
+            currentUser.customShiftIn = newIn; currentUser.customShiftOut = newOut;
+            saveToStorage(); 
+            document.getElementById('shiftSelect').value = 'custom';
+            setupUserInterface(); 
+            alert("Jadwal / Jam Shift Custom diperbarui!");
+        }
+    }
+
+    function switchTab(tab, element) {
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        element.classList.add('active');
+        document.getElementById('viewHome').classList.add('hidden');
+        document.getElementById('viewExcel').classList.add('hidden');
+        document.getElementById('viewProfile').classList.add('hidden');
+        if(tab === 'home') document.getElementById('viewHome').classList.remove('hidden');
+        if(tab === 'excel') {
+            document.getElementById('viewExcel').classList.remove('hidden');
+            renderExcelPreview();
+        }
+        if(tab === 'profile') document.getElementById('viewProfile').classList.remove('hidden');
+    }
+
+    function exportToExcelFormatted() {
+        const targetUsername = currentUser.username;
+        const targetName = currentUser.name.toUpperCase();
+        
+        const months = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
+        const now = new Date();
+        const currentMonthName = months[now.getMonth()];
+        const currentYear = now.getFullYear();
+        const yearShort = String(currentYear).slice(-2);
+        const totalDaysInMonth = new Date(currentYear, now.getMonth() + 1, 0).getDate();
+
+        const userApprovedLogs = attendanceLogs.filter(l => 
+            (currentUser.role === 'pihak2' || l.username === targetUsername) && l.status === 'Disetujui'
+        );
+
+        let totalMasuk = 0, totalLibur = 0, totalSakit = 0, tableRowsHTML = '';
+
+        for (let day = 1; day <= totalDaysInMonth; day++) {
+            const dayFormatted = String(day).padStart(2, '0');
+            const monthFormatted = String(now.getMonth() + 1).padStart(2, '0');
+            const dateDisplay = `${dayFormatted}/${monthFormatted}/${yearShort}`;
+            const targetFullDate = `${currentYear}-${monthFormatted}-${dayFormatted}`;
+
+            const logsOnDay = userApprovedLogs.filter(l => l.fullDate === targetFullDate || l.date.startsWith(`${dayFormatted}/`));
+            const inLog = logsOnDay.find(l => l.type === 'Masuk');
+            const outLog = logsOnDay.find(l => l.type === 'Keluar');
+            const leaveLog = logsOnDay.find(l => l.type === 'Cuti / Sakit');
+
+            let inTime = '-', outTime = '-', status = 'LIBUR', rowStyle = 'background-color: #FF0000; color: #FFFFFF; font-weight: bold;';
+
+            if (leaveLog) {
+                status = 'SAKIT'; totalSakit++; rowStyle = 'background-color: #3B82F6; color: #FFFFFF; font-weight: bold;';
+            } else if (inLog || outLog) {
+                status = 'MASUK'; totalMasuk++; inTime = inLog ? inLog.time : '-'; outTime = outLog ? outLog.time : '-'; rowStyle = 'background-color: #FFFFFF; color: #000000;';
+            } else {
+                totalLibur++;
+            }
+
+            tableRowsHTML += `
+                <tr style="${rowStyle}">
+                    <td style="border: 1px solid #000000; text-align: center; padding: 4px; mso-number-format:'\@';">${dateDisplay}</td>
+                    <td style="border: 1px solid #000000; text-align: center; padding: 4px; mso-number-format:'\@';">${inTime}</td>
+                    <td style="border: 1px solid #000000; text-align: center; padding: 4px; mso-number-format:'\@';">${outTime}</td>
+                    <td style="border: 1px solid #000000; text-align: center; padding: 4px;">${status}</td>
+                </tr>
+            `;
+        }
+
+        const excelHTML = `
+            <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+            <head><meta charset="UTF-8"></head>
+            <body>
+                <table style="border-collapse: collapse; font-family: Arial, sans-serif; font-size: 11pt;">
+                    <tr style="background-color: #FFFF00; font-weight: bold; text-align: center;"><td colspan="4" style="border: 1px solid #000000; padding: 8px; font-size: 14pt;">${targetName}</td></tr>
+                    <tr style="background-color: #FFFF00; font-weight: bold; text-align: center;"><td colspan="4" style="border: 1px solid #000000; padding: 6px; font-size: 12pt;">${currentMonthName} ${currentYear}</td></tr>
+                    <tr style="background-color: #B4C6E7; font-weight: bold; text-align: center;">
+                        <td style="border: 1px solid #000000; width: 100px; padding: 6px;">TANGGAL</td>
+                        <td style="border: 1px solid #000000; width: 80px; padding: 6px;">IN</td>
+                        <td style="border: 1px solid #000000; width: 80px; padding: 6px;">OUT</td>
+                        <td style="border: 1px solid #000000; width: 100px; padding: 6px;">KET</td>
+                    </tr>
+                    ${tableRowsHTML}
+                    <tr><td colspan="4"></td></tr>
+                    <tr style="background-color: #FFC000; font-weight: bold; text-align: center;">
+                        <td style="border: 1px solid #000000; padding: 6px;">JUMLAH HARI</td>
+                        <td style="border: 1px solid #000000; padding: 6px;">MASUK</td>
+                        <td style="border: 1px solid #000000; padding: 6px;">LIBUR</td>
+                        <td style="border: 1px solid #000000; padding: 6px;">SAKIT</td>
+                    </tr>
+                    <tr style="background-color: #FFD966; font-weight: bold; text-align: center;">
+                        <td style="border: 1px solid #000000; padding: 6px;">${totalDaysInMonth}</td>
+                        <td style="border: 1px solid #000000; padding: 6px;">${totalMasuk}</td>
+                        <td style="border: 1px solid #000000; padding: 6px;">${totalLibur}</td>
+                        <td style="border: 1px solid #000000; padding: 6px;">${totalSakit}</td>
+                    </tr>
+                </table>
+            </body>
+            </html>
+        `;
+
+        const blob = new Blob([excelHTML], { type: 'application/vnd.ms-excel;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Presensi_${targetName.replace(/\s+/g, '_')}_${currentMonthName}_${currentYear}.xls`;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    }
+
+    window.onload = function() { initStorage(); };
+</script>
+</body>
+</html>
